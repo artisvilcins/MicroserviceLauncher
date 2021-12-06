@@ -1,4 +1,4 @@
-﻿namespace MicroserviceLauncher
+﻿namespace MicroserviceLauncher.Ui.Models
 {
     public class MicroserviceConfig
     {

@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
+using MicroserviceLauncher.Ui.Models;
+using Microsoft.Extensions.Configuration;
 
-namespace MicroserviceLauncher
+namespace MicroserviceLauncher.Ui.Services
 {
     public class MicroserviceConfigRepository
     {
@@ -16,19 +18,13 @@ namespace MicroserviceLauncher
         {
             var section = _configuration.GetSection("microservices");
 
-            var services = new List<MicroserviceConfig>();
-
-            foreach (var item in section.GetChildren())
-            {
-                services.Add(new MicroserviceConfig
+            return section.GetChildren().Select(item =>
+                new MicroserviceConfig
                 {
                     Name = item["name"],
                     GitPath = item["gitPath"],
                     LaunchPath = item["launchPath"]
-                });
-            }
-
-            return services;
+                }).ToList();
         }
     }
 }

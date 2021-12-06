@@ -1,21 +1,18 @@
-﻿namespace MicroserviceLauncher.Uiw
+﻿namespace MicroserviceLauncher.Ui.Models
 {
     public class MicroserviceRow : MicroserviceConfig
     {
         public delegate void IsRunningChangeHandler(bool isRunning);
-        public event IsRunningChangeHandler IsRunningChange;
+        public event IsRunningChangeHandler? IsRunningChange;
 
-        private bool isRunning;
+        private bool _isRunning;
         public bool IsRunning
         {
-            get
-            {
-                return isRunning;
-            }
+            get => _isRunning;
             set
             {
                 IsRunningChange?.Invoke(value);
-                isRunning = value;
+                _isRunning = value;
             }
         }
     }

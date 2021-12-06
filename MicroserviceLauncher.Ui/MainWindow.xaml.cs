@@ -5,28 +5,30 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MicroserviceLauncher.Ui.Models;
+using MicroserviceLauncher.Ui.Services;
 
-namespace MicroserviceLauncher.Uiw
+namespace MicroserviceLauncher.Ui
 {
     public partial class MainWindow : Window
     {
-        private readonly ObservableCollection<MicroserviceRow> microserviceConfigs;
+        private readonly ObservableCollection<MicroserviceRow> _microserviceConfigs;
 
-        public IEnumerable<MicroserviceRow> MicroserviceConfigs { get { return microserviceConfigs; } }
+        private IEnumerable<MicroserviceRow> MicroserviceConfigs => _microserviceConfigs;
 
-        MicroserviceActionsService microserviceActions;
+        private readonly MicroserviceActionsService _microserviceActions;
 
 
-        Dictionary<MicroserviceRow, Process> processes;
+        private readonly Dictionary<MicroserviceRow, Process> _processes;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            processes = new Dictionary<MicroserviceRow, Process>();
-            microserviceActions = new MicroserviceActionsService();
+            _processes = new Dictionary<MicroserviceRow, Process>();
+            _microserviceActions = new MicroserviceActionsService();
 
-            microserviceConfigs = new ObservableCollection<MicroserviceRow>();
+            _microserviceConfigs = new ObservableCollection<MicroserviceRow>();
 
             var repo = new MicroserviceConfigRepository();
 
@@ -40,25 +42,25 @@ namespace MicroserviceLauncher.Uiw
                     IsRunning = false
                 };
 
-                microserviceConfigs.Add(conf);
+                _microserviceConfigs.Add(conf);
             }
 
-            foreach (var microserviceConfig in microserviceConfigs)
+            foreach (var microserviceConfig in _microserviceConfigs)
             {
                 microserviceConfig.IsRunningChange += change =>
                 {
                     if (change)
                     {
-                        if (processes.TryGetValue(microserviceConfig, out Process process))
+                        if (_processes.TryGetValue(microserviceConfig, out Process process))
                         {
                             process.Start();
                         }
                         else
                         {
-                            var newProcess = microserviceActions.StartMicroservice(microserviceConfig);
+                            var newProcess = _microserviceActions.StartMicroservice(microserviceConfig);
                             newProcess.EnableRaisingEvents = true;
 
-                            processes.Add(microserviceConfig, newProcess);
+                            _processes.Add(microserviceConfig, newProcess);
 
                             newProcess.Exited += (s, e) =>
                             {
@@ -68,7 +70,7 @@ namespace MicroserviceLauncher.Uiw
                     }
                     else
                     {
-                        if (processes.TryGetValue(microserviceConfig, out Process process))
+                        if (_processes.TryGetValue(microserviceConfig, out Process process))
                         {
                             process.Kill();
                         }
@@ -76,7 +78,7 @@ namespace MicroserviceLauncher.Uiw
                 };
             }
 
-            MicroservicesGrid.ItemsSource = microserviceConfigs;
+            MicroservicesGrid.ItemsSource = _microserviceConfigs;
         }
 
         private void PullFromGit_Click(object sender, RoutedEventArgs e)
@@ -88,7 +90,7 @@ namespace MicroserviceLauncher.Uiw
                     var row = (DataGridRow)vis;
                     var item = (MicroserviceRow)row.Item;
 
-                    microserviceActions.PullFromGit(item);
+                    _microserviceActions.PullFromGit(item);
 
                     break;
                 }
@@ -100,13 +102,13 @@ namespace MicroserviceLauncher.Uiw
             Parallel.ForEach(MicroserviceConfigs, new ParallelOptions { MaxDegreeOfParallelism = 4 },
                 service =>
                 {
-                    microserviceActions.PullFromGit(service);
+                    _microserviceActions.PullFromGit(service);
                 });
         }
 
         private void StopAllServices_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var process in processes)
+            foreach (var process in _processes)
             {
                 if (process.Value != null)
                 {

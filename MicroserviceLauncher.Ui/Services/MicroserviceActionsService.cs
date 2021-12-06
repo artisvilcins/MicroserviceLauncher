@@ -1,17 +1,20 @@
 ﻿using System.Diagnostics;
+using MicroserviceLauncher.Ui.Models;
 
-namespace MicroserviceLauncher
+namespace MicroserviceLauncher.Ui.Services
 {
     public class MicroserviceActionsService
     {
         public Process StartMicroservice(MicroserviceConfig config)
         {
-            ProcessStartInfo startinfo = new ProcessStartInfo("dotnet", $"run --project {config.LaunchPath}");
-            startinfo.CreateNoWindow = false;
-            startinfo.UseShellExecute = true;
-            startinfo.WindowStyle = ProcessWindowStyle.Minimized;
+            ProcessStartInfo startInfo = new ProcessStartInfo("dotnet", $"run --project {config.LaunchPath}")
+            {
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
 
-            return Process.Start(startinfo);
+            return Process.Start(startInfo);
         }
 
         public void PullFromGit(MicroserviceConfig config)
@@ -21,10 +24,12 @@ namespace MicroserviceLauncher
                 return;
             }
 
-            ProcessStartInfo gitUpdateStartInfo = new ProcessStartInfo("git", "pull");
-            gitUpdateStartInfo.WorkingDirectory = config.GitPath;
-            gitUpdateStartInfo.CreateNoWindow = false;
-            gitUpdateStartInfo.UseShellExecute = true;
+            ProcessStartInfo gitUpdateStartInfo = new ProcessStartInfo("git", "pull")
+            {
+                WorkingDirectory = config.GitPath,
+                CreateNoWindow = false,
+                UseShellExecute = true
+            };
 
             var gitUpdateProcess = Process.Start(gitUpdateStartInfo);
 
