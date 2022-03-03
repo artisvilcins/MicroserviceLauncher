@@ -5,5 +5,6 @@
         public string Name { get; set; }
         public string GitPath { get; set; }
         public string LaunchPath { get; set; }
+        public string ProcessName { get; set; }
     }
 }

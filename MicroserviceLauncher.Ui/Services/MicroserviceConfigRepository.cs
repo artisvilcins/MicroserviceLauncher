@@ -23,7 +23,8 @@ namespace MicroserviceLauncher.Ui.Services
                 {
                     Name = item["name"],
                     GitPath = item["gitPath"],
-                    LaunchPath = item["launchPath"]
+                    LaunchPath = item["launchPath"],
+                    ProcessName = item["processName"]
                 }).ToList();
         }
     }

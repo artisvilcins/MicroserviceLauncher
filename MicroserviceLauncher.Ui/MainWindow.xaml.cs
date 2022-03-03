@@ -39,11 +39,31 @@ namespace MicroserviceLauncher.Ui
                     Name = service.Name,
                     LaunchPath = service.LaunchPath,
                     GitPath = service.GitPath,
-                    IsRunning = false
+                    IsRunning = false,
+                    ProcessName = service.ProcessName
                 };
 
                 _microserviceConfigs.Add(conf);
             }
+
+            foreach (var p in Process.GetProcesses())
+            {
+                foreach (var configItem in _microserviceConfigs)
+                {
+                    if (!string.IsNullOrWhiteSpace(configItem.ProcessName) && p.ProcessName == configItem.ProcessName)
+                    {
+                        p.EnableRaisingEvents = true;
+
+                        _processes.Add(configItem, p);
+                        p.Exited += (s, e) =>
+                        {
+                            configItem.IsRunning = false;
+                        };
+                        configItem.IsRunning = true;
+                    }
+                }
+            }
+
 
             foreach (var microserviceConfig in _microserviceConfigs)
             {
@@ -51,28 +71,25 @@ namespace MicroserviceLauncher.Ui
                 {
                     if (change)
                     {
-                        if (_processes.TryGetValue(microserviceConfig, out Process process))
-                        {
-                            process.Start();
-                        }
-                        else
-                        {
-                            var newProcess = _microserviceActions.StartMicroservice(microserviceConfig);
-                            newProcess.EnableRaisingEvents = true;
+                        var newProcess = _microserviceActions.StartMicroservice(microserviceConfig);
+                        newProcess.EnableRaisingEvents = true;
 
-                            _processes.Add(microserviceConfig, newProcess);
+                        var processName = newProcess.ProcessName;
 
-                            newProcess.Exited += (s, e) =>
-                            {
-                                microserviceConfig.IsRunning = false;
-                            };
-                        }
+                        _processes.Add(microserviceConfig, newProcess);
+
+                        newProcess.Exited += (s, e) =>
+                        {
+                            microserviceConfig.IsRunning = false;
+                        };
                     }
                     else
                     {
                         if (_processes.TryGetValue(microserviceConfig, out Process process))
                         {
                             process.Kill();
+
+                            _processes.Remove(microserviceConfig);
                         }
                     }
                 };

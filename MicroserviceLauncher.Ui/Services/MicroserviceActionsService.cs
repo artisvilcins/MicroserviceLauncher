@@ -11,7 +11,8 @@ namespace MicroserviceLauncher.Ui.Services
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Minimized
+                WindowStyle = ProcessWindowStyle.Minimized,
+               
             };
 
             return Process.Start(startInfo);
