@@ -7,15 +7,29 @@ namespace MicroserviceLauncher.Ui.Services
     {
         public Process StartMicroservice(MicroserviceConfig config)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("dotnet", $"run --project {config.LaunchPath}")
+            DotnetRestore(config.LaunchPath);
+            
+            var startInfo = new ProcessStartInfo("dotnet", $"run --project {config.LaunchPath}")
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
                 WindowStyle = ProcessWindowStyle.Minimized,
-               
             };
 
             return Process.Start(startInfo);
+        }
+
+        private static void DotnetRestore(string launchPath)
+        {
+            var startInfo = new ProcessStartInfo("dotnet", $"restore --project {launchPath}")
+            {
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Minimized,
+            };
+            
+            var process = Process.Start(startInfo);
+            process.WaitForExit();
         }
 
         public void PullFromGit(MicroserviceConfig config)

@@ -24,7 +24,8 @@ namespace MicroserviceLauncher.Ui.Services
                     Name = item["name"],
                     GitPath = item["gitPath"],
                     LaunchPath = item["launchPath"],
-                    ProcessName = item["processName"]
+                    ProcessName = item["processName"],
+                    IsMandatory = !string.IsNullOrWhiteSpace(item["isMandatory"]) && bool.Parse(item["isMandatory"])
                 }).ToList();
         }
     }

@@ -3,7 +3,7 @@
     public class MicroserviceRow : MicroserviceConfig
     {
         public delegate void IsRunningChangeHandler(bool isRunning);
-        public event IsRunningChangeHandler? IsRunningChange;
+        public event IsRunningChangeHandler IsRunningChange;
 
         private bool _isRunning;
         public bool IsRunning

@@ -40,7 +40,8 @@ namespace MicroserviceLauncher.Ui
                     LaunchPath = service.LaunchPath,
                     GitPath = service.GitPath,
                     IsRunning = false,
-                    ProcessName = service.ProcessName
+                    ProcessName = service.ProcessName,
+                    IsMandatory = service.IsMandatory
                 };
 
                 _microserviceConfigs.Add(conf);
@@ -73,9 +74,7 @@ namespace MicroserviceLauncher.Ui
                     {
                         var newProcess = _microserviceActions.StartMicroservice(microserviceConfig);
                         newProcess.EnableRaisingEvents = true;
-
-                        var processName = newProcess.ProcessName;
-
+                        
                         _processes.Add(microserviceConfig, newProcess);
 
                         newProcess.Exited += (s, e) =>
@@ -98,19 +97,32 @@ namespace MicroserviceLauncher.Ui
             MicroservicesGrid.ItemsSource = _microserviceConfigs;
         }
 
+        private void StartMandatoryServices_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var microservice in _microserviceConfigs)
+            {
+                if (microservice.IsMandatory && !microservice.IsRunning)
+                {
+                    microservice.IsRunning = true;
+                    // StartMicroservice(microservice);
+                }
+            }
+            
+            MicroservicesGrid.Items.Refresh();
+        }
+        
         private void PullFromGit_Click(object sender, RoutedEventArgs e)
         {
             for (var vis = sender as Visual; vis != null; vis = VisualTreeHelper.GetParent(vis) as Visual)
             {
-                if (vis is DataGridRow)
+                if (vis is not DataGridRow row)
                 {
-                    var row = (DataGridRow)vis;
-                    var item = (MicroserviceRow)row.Item;
-
-                    _microserviceActions.PullFromGit(item);
-
-                    break;
+                    continue;
                 }
+                
+                var item = (MicroserviceRow)row.Item;
+                _microserviceActions.PullFromGit(item);
+                break;
             }
         }
 
