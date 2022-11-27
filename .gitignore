@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Rider specific files
 .idea/
+
+# Develpment configuration
+appsettings.Development.json
