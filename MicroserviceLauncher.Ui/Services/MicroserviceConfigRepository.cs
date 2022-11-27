@@ -11,7 +11,10 @@ namespace MicroserviceLauncher.Ui.Services
 
         public MicroserviceConfigRepository()
         {
-            _configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            _configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.Development.json", true)
+                .Build();
         }
 
         public List<MicroserviceConfig> GetMicroservices()
