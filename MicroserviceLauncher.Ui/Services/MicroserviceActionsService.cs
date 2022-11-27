@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using MicroserviceLauncher.Ui.Models;
 
 namespace MicroserviceLauncher.Ui.Services
@@ -7,9 +8,29 @@ namespace MicroserviceLauncher.Ui.Services
     {
         public Process StartMicroservice(MicroserviceConfig config)
         {
-            DotnetRestore(config.LaunchPath);
+            if (config.LaunchPath.EndsWith(".csproj"))
+            {
+                return RunDotnetMicroservice(config.LaunchPath);
+            }
+
+            if (config.LaunchPath.EndsWith(".exe"))
+            {
+                return LaunchExeMicroservice(config.LaunchPath);
+            }
+
+            throw new ArgumentException("Not supported microservice launch type");
+        }
+
+        private static Process LaunchExeMicroservice(string launchPath)
+        {
+            return Process.Start(launchPath);
+        }
+        
+        private static Process RunDotnetMicroservice(string launchPath)
+        {
+            DotnetRestore(launchPath);
             
-            var startInfo = new ProcessStartInfo("dotnet", $"run --project {config.LaunchPath}")
+            var startInfo = new ProcessStartInfo("dotnet", $"run --project {launchPath}")
             {
                 CreateNoWindow = false,
                 UseShellExecute = true,
