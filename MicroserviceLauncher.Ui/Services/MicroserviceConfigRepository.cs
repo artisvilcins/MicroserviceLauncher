@@ -17,6 +17,18 @@ namespace MicroserviceLauncher.Ui.Services
                 .Build();
         }
 
+        public List<GitFolder> GetGitFolders()
+        {
+            var section = _configuration.GetSection("gitFolders");
+            
+            return section.GetChildren().Select(item =>
+                new GitFolder
+                {
+                    Name = item["name"],
+                    Path = item["path"],
+                }).ToList();
+        }
+
         public List<MicroserviceConfig> GetMicroservices()
         {
             var section = _configuration.GetSection("microservices");

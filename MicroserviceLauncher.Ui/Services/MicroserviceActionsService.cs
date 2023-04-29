@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using MicroserviceLauncher.Ui.Models;
 
@@ -53,22 +54,22 @@ namespace MicroserviceLauncher.Ui.Services
             process.WaitForExit();
         }
 
-        public void PullFromGit(MicroserviceConfig config)
+        public void PullFromGit(string path)
         {
-            if (string.IsNullOrWhiteSpace(config.GitPath))
+            if (string.IsNullOrWhiteSpace(path))
             {
                 return;
             }
-
-            ProcessStartInfo gitUpdateStartInfo = new ProcessStartInfo("git", "pull")
+            
+            var gitUpdateStartInfo = new ProcessStartInfo("git", "pull")
             {
-                WorkingDirectory = config.GitPath,
+                WorkingDirectory = path,
                 CreateNoWindow = false,
-                UseShellExecute = true
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Minimized,
             };
 
             var gitUpdateProcess = Process.Start(gitUpdateStartInfo);
-
             gitUpdateProcess.WaitForExit();
         }
     }

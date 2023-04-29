@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,6 +22,7 @@ public partial class MainWindow
 
 
     private readonly Dictionary<MicroserviceRow, Process> _processes;
+    private readonly MicroserviceConfigRepository _repo;
 
     public MainWindow()
     {
@@ -31,9 +33,9 @@ public partial class MainWindow
 
         _microserviceConfigs = new ObservableCollection<MicroserviceRow>();
 
-        var repo = new MicroserviceConfigRepository();
+        _repo = new MicroserviceConfigRepository();
 
-        foreach (var service in repo.GetMicroservices())
+        foreach (var service in _repo.GetMicroservices())
         {
             var conf = new MicroserviceRow
             {
@@ -46,6 +48,26 @@ public partial class MainWindow
             };
 
             _microserviceConfigs.Add(conf);
+
+            var top = 66;
+
+            foreach (var gitFolder in _repo.GetGitFolders())
+            {
+                var newBtn = new Button
+                {
+                    Content = gitFolder.Name,
+                    Height = 26,
+                    Width = 150,
+                    Margin = new Thickness(10, top, 0, 0),
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    VerticalAlignment = VerticalAlignment.Top
+                };
+
+                newBtn.Click += (_, __) => PullFromFolders_Click(gitFolder);
+                    
+                GitLayoutRoot.Children.Add(newBtn);
+                top += 40;
+            }
         }
 
         foreach (var p in Process.GetProcesses())
@@ -124,7 +146,7 @@ public partial class MainWindow
             }
 
             var item = (MicroserviceRow)row.Item;
-            _microserviceActions.PullFromGit(item);
+            _microserviceActions.PullFromGit(item.GitPath);
             break;
         }
     }
@@ -132,7 +154,7 @@ public partial class MainWindow
     private void PullAllServices_Click(object sender, RoutedEventArgs e)
     {
         Parallel.ForEach(MicroserviceConfigs, new ParallelOptions { MaxDegreeOfParallelism = 4 },
-            service => { _microserviceActions.PullFromGit(service); });
+            service => { _microserviceActions.PullFromGit(service.GitPath); });
     }
 
     private void StopAllServices_Click(object sender, RoutedEventArgs e)
@@ -144,5 +166,29 @@ public partial class MainWindow
         }
 
         MicroservicesGrid.Items.Refresh();
+    }
+
+    private void PullFromAllFolders_Click(object sender, RoutedEventArgs e)
+    {
+        foreach (var gitFolder in _repo.GetGitFolders())
+        {
+            PullFromFolders_Click(gitFolder);
+        }
+    }
+    
+    private void PullFromFolders_Click(GitFolder folder)
+    {
+        var mainDir = new DirectoryInfo(folder.Path);
+
+        var subDirs = mainDir.EnumerateDirectories();
+        
+        Parallel.ForEach(subDirs, new ParallelOptions { MaxDegreeOfParallelism = 5 },
+            subDir =>
+            {
+                if (subDir.EnumerateDirectories().Any(s => s.Name.Contains(".git")))
+                {
+                    _microserviceActions.PullFromGit(subDir.FullName);
+                }
+            });
     }
 }
