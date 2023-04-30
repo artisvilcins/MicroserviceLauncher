@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using MicroserviceLauncher.Ui.Models;
 
 namespace MicroserviceLauncher.Ui.Services
@@ -26,11 +28,11 @@ namespace MicroserviceLauncher.Ui.Services
         {
             return Process.Start(launchPath);
         }
-        
+
         private static Process RunDotnetMicroservice(string launchPath)
         {
             DotnetRestore(launchPath);
-            
+
             var startInfo = new ProcessStartInfo("dotnet", $"run --project {launchPath}")
             {
                 CreateNoWindow = false,
@@ -49,7 +51,7 @@ namespace MicroserviceLauncher.Ui.Services
                 UseShellExecute = true,
                 WindowStyle = ProcessWindowStyle.Minimized,
             };
-            
+
             var process = Process.Start(startInfo);
             process.WaitForExit();
         }
@@ -60,6 +62,17 @@ namespace MicroserviceLauncher.Ui.Services
             {
                 return;
             }
+        
+            var gitswitchStartInfo = new ProcessStartInfo("git", "switch -")
+            {
+                WorkingDirectory = path,
+                CreateNoWindow = false,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Minimized,
+            };
+            var gitswitchProcess = Process.Start(gitswitchStartInfo);
+            gitswitchProcess.WaitForExit();
+            
             
             var gitUpdateStartInfo = new ProcessStartInfo("git", "pull")
             {
@@ -68,7 +81,6 @@ namespace MicroserviceLauncher.Ui.Services
                 UseShellExecute = true,
                 WindowStyle = ProcessWindowStyle.Minimized,
             };
-
             var gitUpdateProcess = Process.Start(gitUpdateStartInfo);
             gitUpdateProcess.WaitForExit();
         }
